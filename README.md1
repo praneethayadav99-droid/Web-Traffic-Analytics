@@ -1,0 +1,95 @@
+import pandas as pd
+import matplotlib.pyplot as plt
+
+# Load Dataset
+df = pd.read_csv("web_traffic.csv")
+
+# Convert Date column to datetime
+df['Date'] = pd.to_datetime(df['Date'])
+
+# Dataset Overview
+print("Dataset Shape:", df.shape)
+print("\nFirst 5 Records:")
+print(df.head())
+
+# Basic Statistics
+print("\nSummary Statistics:")
+print(df.describe())
+
+# Total Metrics
+total_visitors = df['Visitors'].sum()
+total_pageviews = df['PageViews'].sum()
+avg_bounce_rate = df['BounceRate'].mean()
+
+print("\n===== WEBSITE TRAFFIC SUMMARY =====")
+print("Total Visitors:", total_visitors)
+print("Total Page Views:", total_pageviews)
+print("Average Bounce Rate:", round(avg_bounce_rate, 2), "%")
+
+# Top Traffic Sources
+traffic_sources = df.groupby('TrafficSource')['Visitors'].sum()
+
+print("\nVisitors by Traffic Source:")
+print(traffic_sources)
+
+# Daily Traffic Trend
+plt.figure(figsize=(10, 5))
+plt.plot(df['Date'], df['Visitors'])
+plt.title("Daily Website Visitors")
+plt.xlabel("Date")
+plt.ylabel("Visitors")
+plt.grid(True)
+plt.show()
+
+# Traffic Source Distribution
+plt.figure(figsize=(8, 5))
+traffic_sources.plot(kind='bar')
+plt.title("Traffic Source Analysis")
+plt.xlabel("Traffic Source")
+plt.ylabel("Visitors")
+plt.show()
+
+# Top Pages Analysis
+top_pages = (
+    df.groupby('Page')['PageViews']
+    .sum()
+    .sort_values(ascending=False)
+    .head(10)
+)
+
+print("\nTop Pages:")
+print(top_pages)
+
+plt.figure(figsize=(10, 5))
+top_pages.plot(kind='bar')
+plt.title("Top 10 Most Viewed Pages")
+plt.xlabel("Page")
+plt.ylabel("Page Views")
+plt.show()
+
+# Bounce Rate Analysis
+plt.figure(figsize=(10, 5))
+plt.hist(df['BounceRate'], bins=10)
+plt.title("Bounce Rate Distribution")
+plt.xlabel("Bounce Rate (%)")
+plt.ylabel("Frequency")
+plt.show()
+
+# Session Duration Analysis
+if 'SessionDuration' in df.columns:
+    avg_duration = df['SessionDuration'].mean()
+
+    print("\nAverage Session Duration:",
+          round(avg_duration, 2), "minutes")
+
+# Export Summary Report
+report = {
+    "Total Visitors": [total_visitors],
+    "Total Page Views": [total_pageviews],
+    "Average Bounce Rate": [round(avg_bounce_rate, 2)]
+}
+
+report_df = pd.DataFrame(report)
+report_df.to_csv("traffic_summary_report.csv", index=False)
+
+print("\nReport saved as traffic_summary_report.csv")
